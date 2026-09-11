@@ -1,0 +1,22 @@
+[package]
+name = "skill-issue"
+version = "0.2.0"
+edition = "2021"
+rust-version = "1.74"
+description = "Terminal GIF player that runs on shell command failure"
+license = "GPL-3.0-or-later"
+
+[[bin]]
+name = "skill-issue"
+path = "src/main.rs"
+
+[dependencies]
+crossterm = "0.28"
+image = { version = "0.25", default-features = false, features = ["gif"] }
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
+panic = "abort"
+strip = true
