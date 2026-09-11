@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-BIN_PATH="$HOME/.local/bin/skill-issue"
-CONFIG_DIR="$HOME/.config/skill-issue"
+BIN_DIR="${BIN_DIR:-$HOME/.local/bin}"
+CONFIG_DIR="${CONFIG_DIR:-$HOME/.config/skill-issue}"
+BIN_PATH="$BIN_DIR/skill-issue"
 FISH_PLUGIN="$HOME/.config/fish/conf.d/skill_issue.fish"
 
 remove_block() {

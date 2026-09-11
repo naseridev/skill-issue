@@ -3,7 +3,7 @@ set -euo pipefail
 
 APP_NAME="skill-issue"
 VERSION="0.2.0"
-REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PKG_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 BIN_DIR="${BIN_DIR:-$HOME/.local/bin}"
 CONFIG_DIR="${CONFIG_DIR:-$HOME/.config/skill-issue}"
 TARGET_GIF="$CONFIG_DIR/fail.gif"
@@ -43,9 +43,19 @@ resolve_input() {
   esac
 }
 
+find_binary() {
+  if [ -x "$PKG_DIR/$APP_NAME" ]; then
+    printf '%s\n' "$PKG_DIR/$APP_NAME"
+  elif [ -x "$PKG_DIR/target/release/$APP_NAME" ]; then
+    printf '%s\n' "$PKG_DIR/target/release/$APP_NAME"
+  else
+    return 1
+  fi
+}
+
 write_default_gif() {
-  if [ ! -f "$TARGET_GIF" ] && [ -f "$REPO_ROOT/assets/default.gif" ]; then
-    cp -- "$REPO_ROOT/assets/default.gif" "$TARGET_GIF"
+  if [ ! -f "$TARGET_GIF" ] && [ -f "$PKG_DIR/assets/default.gif" ]; then
+    cp -- "$PKG_DIR/assets/default.gif" "$TARGET_GIF"
   fi
 }
 
@@ -139,18 +149,22 @@ check_input_early() {
 }
 
 main() {
-  need_cmd cargo
   check_input_early
-  if ! command -v rustc >/dev/null 2>&1 && [ -f "$HOME/.cargo/env" ]; then
-    . "$HOME/.cargo/env"
-  fi
 
-  step "Building $APP_NAME $VERSION (release)"
-  (cd "$REPO_ROOT" && cargo build --release --locked)
+  local binary
+  if ! binary="$(find_binary)"; then
+    need_cmd cargo
+    if ! command -v rustc >/dev/null 2>&1 && [ -f "$HOME/.cargo/env" ]; then
+      . "$HOME/.cargo/env"
+    fi
+    step "Building $APP_NAME $VERSION (release)"
+    (cd "$PKG_DIR" && cargo build --release --locked)
+    binary="$(find_binary)" || fail "compiled binary not found in $PKG_DIR"
+  fi
 
   step "Installing binary to $BIN_DIR"
   mkdir -p "$BIN_DIR" "$CONFIG_DIR"
-  install -m 755 "$REPO_ROOT/target/release/$APP_NAME" "$BIN_DIR/$APP_NAME"
+  install -m 755 "$binary" "$BIN_DIR/$APP_NAME"
 
   step "Configuring media"
   if [ -n "$INPUT_FILE" ]; then
