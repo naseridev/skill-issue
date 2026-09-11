@@ -4,6 +4,39 @@ Terminal GIF player that runs when a shell command fails. A shell hook watches
 the exit status of each command and plays a configured GIF with half-block
 characters when the status is nonzero.
 
+## Install
+
+The recommended installation method is to download a release package from the
+[Releases](https://github.com/naseridev/skill-issue/releases) section, unzip
+it, and run the installer from the extracted directory:
+
+```sh
+unzip skill-issue-vX.Y.Z-x86_64-unknown-linux-gnu.zip
+cd skill-issue-vX.Y.Z-x86_64-unknown-linux-gnu
+./install.sh [CLIP]
+```
+
+The release package contains a prebuilt binary, so no Rust toolchain is
+needed. Pick the archive matching your operating system and architecture. If
+no release matches your platform, fall back to the manual installation below,
+which builds from source.
+
+### Manual install
+
+Clone the repository and run:
+
+```sh
+./install.sh [CLIP]
+```
+
+This requires a Rust toolchain with cargo (release build uses `--locked`).
+
+`CLIP` may be a gif file or a video file (mp4, webm, mov, mkv, m4v). Video
+clips are converted to gif at 15 fps and 320 pixels wide. Without `CLIP`,
+the installer uses `assets/default.gif`. The binary goes to
+`~/.local/bin/skill-issue` and media goes to `~/.config/skill-issue/fail.gif`.
+Override either location with `BIN_DIR` or `CONFIG_DIR`.
+
 ## Layout
 
 - `src/main.rs` - GIF decoding, terminal sizing, rendering, playback
@@ -14,22 +47,10 @@ characters when the status is nonzero.
 
 ## Requirements
 
-- Rust toolchain with cargo (release build uses `--locked`)
 - ffmpeg only when converting video input (gif input needs no ffmpeg)
 - python3 used by the installer to validate the installed GIF header
 - bash, zsh, or fish for the failure hook
-
-## Install
-
-```sh
-./install.sh [CLIP]
-```
-
-`CLIP` may be a gif file or a video file (mp4, webm, mov, mkv, m4v). Video
-clips are converted to gif at 15 fps and 320 pixels wide. Without `CLIP`,
-the installer uses `assets/default.gif`. The binary goes to
-`~/.local/bin/skill-issue` and media goes to `~/.config/skill-issue/fail.gif`.
-Override either location with `BIN_DIR` or `CONFIG_DIR`.
+- Rust toolchain with cargo only for the manual install from source
 
 The installer appends a hook to `~/.bashrc` and `~/.zshrc` when those shells
 are present, and writes `~/.config/fish/conf.d/skill_issue.fish` for fish.
